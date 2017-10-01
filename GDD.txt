@@ -10,7 +10,7 @@ Technical Aspects:
 
 Game Flow:
 	To start the game, the player will have to either access a static URL with all the assets and files needed already set in the server side or have such files locally inside a folder and open the index.html file, which will start the game in a local Internet browser window. With the game started, the EnchantJS framework will load all the required assets, assuming they are still in the same folder hierarchy as they were when development was taking place, and the game will start when the loading phase is completed.
-	The first screen the player will see is a menu with the game's logo telling the player to press spacebar to continue. Upon doing so, another menu will replace the previous one and offer the player the option to choose which mode should be started: "Player vs. Computer" or "Computer vs. Computer", or to Quit the game.
+	The first screen the player will see is a menu with the game's logo telling the player to click anywhere to continue. Upon doing so, another menu will replace the previous one and offer the player the option to choose which mode should be started: "Player vs. Computer" or "Computer vs. Computer", or to Quit the game.
 	After selecting either one of the options in the menu the player will be taken to the game's stage, the only difference being in the first option that the player has the ability to give the game inputs while its computer opponent waits. The stage itself is composed by an area with the player's options of play as buttons, an area representing the oponnent, an area displaying the relevant game information, including a button to stop the matches, and an area where both players' plays will be compared and the result will be given. The result will update the game's information area according to the number of victories or defeats the player had so far and then reset the stage back so another match can be played instantly after.
 	When the player presses the option to stop the matches the game will redirect the flow back to the menu with the game's logo and the process may be restart.
 
@@ -50,3 +50,4 @@ Possible future add-ons to the Minimum Viable Product:
 GDD ToDo:
  Create a description/readme in the GitHub repository;
  Review the assets needed;
+ Test in a webserver;

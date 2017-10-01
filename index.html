@@ -6,17 +6,18 @@
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 		
+		<title> Waste an hour having fun </title>
+		
 		<style type="text/css">
 			body {margin: 0;}
 		</style>
 		
-		<script src="main.js"> </script>
+		<script src="js/main.js"></script>
+		<script src="js/splash.js"></script>
+		<script src="js/menu.js"></script>
+		<script src="js/game.js"></script>
 	</head>
     <body>	
-		<div class="global" style="width:800; height:600; position: fixed; transform-origin: 0px 0px 0px; left: 50%; margin-left: -400px;">
-			<div class="siteBody" style="position: relative; margin-left: 20px; margin-top: 40px;">
-				<div id="game-stage"></div>				
-			</div>
-		</div>	
+		<canvas id="gameCanvas" width="256" height="512" style="position: relative; left: 50%; margin-left: -128px; margin-top: 50px;"></canvas>			
 	</body>
 </html>
