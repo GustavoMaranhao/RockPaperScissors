@@ -34,7 +34,7 @@ var splashScreen = function(manager){
 		}
 		
 		//Desenha o subtexto com transparência
-		splashCtx.save();			
+		splashCtx.save();
 		splashCtx.globalAlpha = beginTextAlpha;
 		splashCtx.drawImage(manager.getGameImages()['SplashMenu/Text_Begin'],
 							(splashCanvas.width - manager.getGameImages()['SplashMenu/Text_Begin'].width)/2,

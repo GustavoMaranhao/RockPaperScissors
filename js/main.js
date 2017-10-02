@@ -8,6 +8,12 @@ window.onload = function(){
 	var gameHeight = canvas.height;	
 	var gameImages;
 	
+	var bMakeTransition;	
+	var bFadeIn;
+	var bFadeOut;
+	var transitionStep = 0.025;
+	var tempAlpha = 1;
+	
 	var now = timestamp();
 	var last = timestamp();
 	var deltaTime = now - last;
@@ -41,16 +47,20 @@ window.onload = function(){
 		
 		//Verifica qual stage estamos iniciando
 		switch(currentStage){
-			case 0: stage = splashScreen(this); break;
-			case 1: stage = menuScreen(this); break;
-			case 2: stage = gameScreen(this); break;
-			default: stage = splashScreen(this);
+			case 0: stage = splashScreen(this); bFadeIn = false; break;
+			case 1: stage = menuScreen(this); bFadeIn = true; break;
+			case 2: stage = gameScreen(this); bFadeIn = true; break;
+			default: stage = splashScreen(this); bFadeIn = false; 
 		}
+		
+		//Configura a tela de transição
+		bMakeTransition = true;
+		bFadeOut = true;		
 		
 		//Começa o loop principal do jogo
 		run();
 	}
-	
+		
 	//Game Loop principal
 	function run() {		
 		//Atualiza as variáveis de temporização do loop, delta será em milisegundos e limitado a 1 segundo no máximo
@@ -60,9 +70,50 @@ window.onload = function(){
 		//Desenhar a imagem de fundo comum para todas as telas
 		ctx.drawImage(gameImages['Image_BackGround'],0,0,gameImages['Image_BackGround'].width,gameImages['Image_BackGround'].height);
 		
-		//Desenhar o canvas específico de cada stage
-		stage.stageLoop(deltaTime);
-		ctx.drawImage(stage.toDraw,0,0,gameWidth,gameHeight);
+		//Transição de stages		
+		if(bMakeTransition){
+			//Cria um canvas temporário para a transição
+			var transitionCanvas = transitionCanvas || createCanvas(gameWidth, gameHeight);
+			var transitionCtx = transitionCanvas.getContext('2d');
+			
+			//Prepara uma tela escura de Fade In/Out
+			transitionCtx.beginPath();
+			transitionCtx.rect(0, 0, gameWidth, gameHeight);			
+		
+			//Se for para mostrar a tela de transição
+			if(bFadeIn){
+				if(tempAlpha <= (1 - transitionStep))		
+					tempAlpha += transitionStep;
+				else {
+					bFadeIn = false;
+					tempAlpha = 1;
+				}
+			}	
+		
+			//Se for para esconder a tela de transição e já tiver terminado o Fade In
+			if(!bFadeIn && bFadeOut){
+				if(tempAlpha >= transitionStep)						
+					tempAlpha -= transitionStep;						
+				else {
+					bFadeOut = false;
+					tempAlpha = 0;
+				}
+			}			
+
+			transitionCtx.fillStyle='rgb(0,0,0,'+tempAlpha+')';
+			transitionCtx.fill();
+			transitionCtx.closePath();
+			
+			//ctx.save();
+			ctx.drawImage(transitionCanvas,0,0,gameWidth,gameHeight);
+			//ctx.restore();
+			
+			if (!bFadeIn && !bFadeOut) bMakeTransition = false;	
+		} else {			
+			//Desenhar o canvas específico de cada stage
+			stage.stageLoop(deltaTime);
+			ctx.drawImage(stage.toDraw,0,0,gameWidth,gameHeight);
+		}
 		
 		//Atualiza a variável de temporização do loop
 		last = now;
