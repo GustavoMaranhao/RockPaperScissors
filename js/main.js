@@ -35,6 +35,7 @@ window.onload = function(){
 						'GameStage/Result_Paper',
 						'GameStage/Result_Rock',
 						'GameStage/Result_Scissors',
+						'GameStage/Text_Draw',
 						'GameStage/Text_Lose',
 						'GameStage/Text_Win',
 						'MainMenu/Button_Quit',

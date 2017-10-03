@@ -12,6 +12,9 @@ var gameScreen = function(manager, gMode){
 	var gameElements = [];
 	var bElementsCreated = false;
 	
+	var resultScreenTop = 0;
+	var resultScreenBottom = 0;
+	
 	var buttonPadding = 15;
 	var edgePadding = 5;
 	
@@ -20,8 +23,19 @@ var gameScreen = function(manager, gMode){
 	
 	var roundChoice = '';
 	var roundOpponentChoice = '';
+	var bIsPlaying = false;
 	
-	//TODO Verificar o caso de duplo-clique
+	var animSpeed = 100;
+	
+	var defaultAnimTime = 100;
+	var choicesAnimTime = 0;
+	
+	var defaultScreenTimer = 125;
+	var resultScreenTimer = 0;
+	var resultScreenWait = 115;
+	
+	var scoreAdded = false;
+	
 	//TODO variável defaul nula com additional rules
 	
 	function createElements() {
@@ -45,7 +59,8 @@ var gameScreen = function(manager, gMode){
 			left: (gameScreenCanvas.width - manager.getGameImages()['GameStage/Button_Paper'].width)/2,
 			top: gameScreenCanvas.height - manager.getGameImages()['GameStage/Button_Paper'].height - edgePadding,
 			width: manager.getGameImages()['GameStage/Button_Paper'].width,
-			height: manager.getGameImages()['GameStage/Button_Paper'].height
+			height: manager.getGameImages()['GameStage/Button_Paper'].height,
+			beats: ["Rock"]
 		});
 		auxHeight += gameScreenCanvas.height - manager.getGameImages()['GameStage/Button_Paper'].height - edgePadding;	
 		
@@ -56,7 +71,8 @@ var gameScreen = function(manager, gMode){
 			left: (gameScreenCanvas.width - 3*manager.getGameImages()['GameStage/Button_Rock'].width)/2 - edgePadding,
 			top: auxHeight - manager.getGameImages()['GameStage/Button_Rock'].height/2 - buttonPadding,
 			width: manager.getGameImages()['GameStage/Button_Rock'].width,
-			height: manager.getGameImages()['GameStage/Button_Rock'].height
+			height: manager.getGameImages()['GameStage/Button_Rock'].height,
+			beats: ["Scissors"]
 		});	
 
 		//Cria o botão da tesoura
@@ -66,7 +82,8 @@ var gameScreen = function(manager, gMode){
 			left: (gameScreenCanvas.width + manager.getGameImages()['GameStage/Button_Scissors'].width)/2 + edgePadding,
 			top: auxHeight - manager.getGameImages()['GameStage/Button_Scissors'].height/2 - buttonPadding,
 			width: manager.getGameImages()['GameStage/Button_Scissors'].width,
-			height: manager.getGameImages()['GameStage/Button_Scissors'].height
+			height: manager.getGameImages()['GameStage/Button_Scissors'].height,
+			beats: ["Paper"]
 		});		
 		
 		bElementsCreated = true;
@@ -79,6 +96,8 @@ var gameScreen = function(manager, gMode){
 							   0,
 							   manager.getGameImages()['GameStage/Pannel_Upper'].width,
 							   manager.getGameImages()['GameStage/Pannel_Upper'].height);
+		//Variável auxiliar para o desenho do resultado posteriormente
+		resultScreenTop = manager.getGameImages()['GameStage/Pannel_Upper'].height;
 
 		//Desenha o painel inferior
 		gameScreenCtx.drawImage(manager.getGameImages()['GameStage/Pannel_Lower'],
@@ -86,6 +105,8 @@ var gameScreen = function(manager, gMode){
 							   gameScreenCanvas.height - manager.getGameImages()['GameStage/Pannel_Lower'].height,
 							   manager.getGameImages()['GameStage/Pannel_Lower'].width,
 							   manager.getGameImages()['GameStage/Pannel_Lower'].height);
+		//Variável auxiliar para o desenho do resultado posteriormente
+		resultScreenBottom = gameScreenCanvas.height - manager.getGameImages()['GameStage/Pannel_Lower'].height;
 
 		//Desenha texto do número de jogos
 		gameScreenCtx.font = "18px Buxton Sketch";
@@ -111,37 +132,155 @@ var gameScreen = function(manager, gMode){
 		gameElements.forEach(function(gameElement) {		
 			//Desenha os elementos criados de interação com o player		
 			gameScreenCtx.drawImage(gameElement.src,gameElement.left,gameElement.top,gameElement.width,gameElement.height);
+			
+			//Se não estamos jogando
+			if(!bIsPlaying)
+				//Verifica se o player selecionou algum botão
+				if (clickPosY > gameElement.top && clickPosY < gameElement.top + gameElement.height 
+					&& clickPosX > gameElement.left && clickPosX < gameElement.left + gameElement.width) {
+						//Apenas para o modo Vs. Player ou foi selecionado o botão de saída selecionado
+						if (gameElement.elemName == "Exit")
+							//Volta à Splash Screen
+							manager.callStartStage(1);
+						else if (gameMode == 1)
+							//Opção selecionada
+							roundChoice = gameElement.elemName;
 						
-			//Verifica se o player selecionou algum botão
-			if (clickPosY > gameElement.top && clickPosY < gameElement.top + gameElement.height 
-				&& clickPosX > gameElement.left && clickPosX < gameElement.left + gameElement.width) {
-					//Apenas para o modo Vs. Player ou foi selecionado o botão de saída selecionado
-					if (gameElement.elemName == "Exit")
-						//Volta à Splash Screen
-						manager.callStartStage(1);
-					else if (gameMode == 1)
-						//Opção selecionada
-						roundChoice = gameElement.elemName;
-					
-					console.log(roundChoice);
-					//Reseta o clique ao final
-					clickPosX = 0; 
-					clickPosY = 0;
-			}
+						//Reseta o clique ao final
+						clickPosX = 0; 
+						clickPosY = 0;
+				}
 		});			
 	}
 	
 	//Função com a lógica do jogo contra um jogador humano
-	function PlayVsPlayer(){
-		//Se o jogador já escolheu uma opção
-		if (roundChoice != ''){
+	function PlayVsPlayer(deltaTime){
+		//Se o jogador já escolheu uma opção e o resultado não está sendo avaliado
+		if ((roundChoice != '') && !bIsPlaying){
+			bIsPlaying = true;
 			
+			//Escolhe uma opção para o adversário
+			roundOpponentChoice = pickOpponentChoice();						
+		}
+		
+		//Se o oponente já escolheu o que jogar e estamos jogando
+		if((roundOpponentChoice != '') && bIsPlaying){
+			//Desenha as opções escolhidas na tela
+			drawChoices(roundChoice,roundOpponentChoice, deltaTime);
+			
+			//Verifica se o player (primeiro parâmetro) venceu o adversário (segundo parâmetro)
+			var victory = checkChoices(roundChoice, roundOpponentChoice);
+			
+			//Desenha o resultado da partida
+			drawResult(victory,deltaTime);
+
+			//Adiciona o resultado do jogo ao placar caso ainda não tenha sido adicionado
+			if(!scoreAdded){
+				scoreAdded = true;
+				
+				numberOfGames++;
+				if(victory == 'Win') numberOfVictories++;
+			}
 		}
 	}
 	
 	//Função com a lógica do jogo contra o computador
 	function PlayVsComputer(){
 		
+	}
+	
+	function pickOpponentChoice(){
+		var choice = '';
+		//Escolher um número aleatório entre 0 e o comprimento do vetor de elementos (+1 para desconsiderar o primeiro elemento "Exit")
+		var pick = Math.floor(Math.random() * gameElements.length) + 1;
+		if((pick > 0) && (pick < gameElements.length))
+			choice = gameElements[pick].elemName;
+		else
+			choice = pickOpponentChoice();
+		return choice;
+	}
+	
+	//Função que verifica se a escolha 1 ganhoou da escolha 2
+	function checkChoices(choice1,choice2){
+		//Se as duas opções forem iguais a partida é um empate
+		if (choice1 == choice2) return "Draw";
+		
+		//Encontra qual é o elemento selecionado
+		var p1;
+		gameElements.every(function(gameElement) {			
+			if(gameElement.elemName == choice1){				
+				p1 = gameElement;
+				return false;
+			}
+			return true;
+		});
+		
+		//Se o p1 derrotar a opção do oponente retorna Vitória
+		if(p1.beats == choice2) return "Win";
+		//Caso contrário é uma derrota
+		else return "Lose";
+	}	
+	
+	//Função que desenha a opção 1 na parte da tela mais abaixo da opção 2
+	function drawChoices(choice1,choice2,deltaTime){
+		//Autaliza o tempo de animação
+		choicesAnimTime += animSpeed*deltaTime;
+		
+		gameScreenCtx.save();
+		//Animação de Fade In
+		gameScreenCtx.globalAlpha = choicesAnimTime/defaultAnimTime;
+		
+		//Desenha um fundo para indicar que os resultados estão sendo mostrados
+		gameScreenCtx.beginPath();
+		gameScreenCtx.rect(0, 0, gameScreenCanvas.width, gameScreenCanvas.height);
+		gameScreenCtx.fillStyle='rgb(0,0,0,0.5)';
+		gameScreenCtx.fill();
+		gameScreenCtx.closePath();
+		
+		//Desenha a escolha do jogador
+		gameScreenCtx.drawImage(manager.getGameImages()['GameStage/Result_'+choice1],
+							   (gameScreenCanvas.width - manager.getGameImages()['GameStage/Result_'+choice1].width)/2,
+							   resultScreenBottom - manager.getGameImages()['GameStage/Result_'+choice1].height*3/2,
+							   manager.getGameImages()['GameStage/Result_'+choice1].width,
+							   manager.getGameImages()['GameStage/Result_'+choice1].height);
+							   
+		//Desenha a escolha do oponente
+		gameScreenCtx.drawImage(manager.getGameImages()['GameStage/Result_'+choice2],
+							   (gameScreenCanvas.width - manager.getGameImages()['GameStage/Result_'+choice2].width)/2,
+							   resultScreenTop + manager.getGameImages()['GameStage/Result_'+choice2].height/2,
+							   manager.getGameImages()['GameStage/Result_'+choice2].width,
+							   manager.getGameImages()['GameStage/Result_'+choice2].height);
+
+		gameScreenCtx.restore();
+	}
+
+	function drawResult(resultToDraw, deltaTime){
+		//Autaliza o tempo de animação
+		resultScreenTimer += animSpeed*deltaTime;
+		
+		gameScreenCtx.save();
+		//Animação de Fade In após um tempo
+		if(resultScreenTimer >= resultScreenWait) gameScreenCtx.globalAlpha = (resultScreenTimer - resultScreenWait)/defaultScreenTimer;
+		else gameScreenCtx.globalAlpha = 0;
+		
+		//Desenha o resultado da partida
+		gameScreenCtx.drawImage(manager.getGameImages()['GameStage/Text_'+resultToDraw],
+							   (gameScreenCanvas.width - manager.getGameImages()['GameStage/Text_'+resultToDraw].width)/2,
+							   (resultScreenBottom - resultScreenTop)/2,
+							   manager.getGameImages()['GameStage/Text_'+resultToDraw].width,
+							   manager.getGameImages()['GameStage/Text_'+resultToDraw].height);
+							   
+		gameScreenCtx.restore();
+	}
+	
+	//Reinicia as variáveis necessárias para um novo jogo
+	function resetGame(){
+		bIsPlaying = false;
+		roundChoice = '';
+		roundOpponentChoice = '';
+		choicesAnimTime = 0;
+		resultScreenTimer = 0;	
+		scoreAdded = false;	
 	}
 	
 	//Define as funções e variáveis que serão de escopo público
@@ -152,7 +291,7 @@ var gameScreen = function(manager, gMode){
 			
 			//Verifica qual modo está sendo jogado
 			switch(gameMode){
-				case 1: PlayVsPlayer(); break;
+				case 1: PlayVsPlayer(delta); break;
 				case 2: PlayVsComputer(); break;
 				default: alert('An error seems to have happened, please try again!'); manager.callStartStage(0); break;
 			}
@@ -162,6 +301,10 @@ var gameScreen = function(manager, gMode){
 				//Zera as variáveis para que não repita a chamada
 				clickPosX = 0;
 				clickPosY = 0;
+				
+				//Reinicia o jogo caso haja um clique depois dos resultados forem mostrados
+				if(bIsPlaying && ((resultScreenTimer - resultScreenWait)/defaultScreenTimer >= 1))
+					resetGame();
 			}
 		},
 		
