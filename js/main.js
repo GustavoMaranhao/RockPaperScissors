@@ -11,7 +11,7 @@ window.onload = function(){
 	var bMakeTransition;	
 	var bFadeIn;
 	var bFadeOut;
-	var transitionStep = 0.025;
+	var transitionStep = 2.25;
 	var tempAlpha = 1;
 	
 	var now = timestamp();
@@ -20,6 +20,10 @@ window.onload = function(){
 	
 	var stage = {};
 	var currentStage = 0;
+	
+	var gameMode = 0;
+	
+	//TODO Corriger a primeira transição de entrada
 	
 	preloadImageAssets(['Image_BackGround',
 	 				    'GameStage/Button_Exit',
@@ -40,22 +44,29 @@ window.onload = function(){
 						'SplashMenu/Text_Begin',
 						'SplashMenu/Text_Title'],
 					startStage);	
-					
+	
 	function startStage(images){
-		//Guarda uma referência para as imagens
-		if(gameImages == undefined) gameImages = images;
+		//Configura a tela de transição
+		bMakeTransition = true;
+		bFadeIn = true;
+		bFadeOut = true;	
+			
+		//Verifica se é a primeira vez que o método está sendo rodado
+		if(gameImages == undefined){
+			//Guarda uma referência para as imagens
+			gameImages = images;
+			
+			//Na primeira transição não precisa dar um fade para a tela preta
+			bFadeIn = false;
+		}
 		
 		//Verifica qual stage estamos iniciando
 		switch(currentStage){
-			case 0: stage = splashScreen(this); bFadeIn = false; break;
-			case 1: stage = menuScreen(this); bFadeIn = true; break;
-			case 2: stage = gameScreen(this); bFadeIn = true; break;
-			default: stage = splashScreen(this); bFadeIn = false; 
+			case 0: stage = splashScreen(this); break;
+			case 1: stage = menuScreen(this); break;
+			case 2: stage = gameScreen(this, gameMode); break;
+			default: stage = splashScreen(this); 
 		}
-		
-		//Configura a tela de transição
-		bMakeTransition = true;
-		bFadeOut = true;		
 		
 		//Começa o loop principal do jogo
 		run();
@@ -82,8 +93,8 @@ window.onload = function(){
 		
 			//Se for para mostrar a tela de transição
 			if(bFadeIn){
-				if(tempAlpha <= (1 - transitionStep))		
-					tempAlpha += transitionStep;
+				if(tempAlpha <= (1 - transitionStep*deltaTime))		
+					tempAlpha += transitionStep*deltaTime;
 				else {
 					bFadeIn = false;
 					tempAlpha = 1;
@@ -92,23 +103,23 @@ window.onload = function(){
 		
 			//Se for para esconder a tela de transição e já tiver terminado o Fade In
 			if(!bFadeIn && bFadeOut){
-				if(tempAlpha >= transitionStep)						
-					tempAlpha -= transitionStep;						
+				if(tempAlpha >= transitionStep*deltaTime)						
+					tempAlpha -= transitionStep*deltaTime;						
 				else {
 					bFadeOut = false;
 					tempAlpha = 0;
 				}
 			}			
 
+			//Aplica a transparência à tela de transição
 			transitionCtx.fillStyle='rgb(0,0,0,'+tempAlpha+')';
 			transitionCtx.fill();
 			transitionCtx.closePath();
 			
-			//ctx.save();
+			//Desenha a tela de transição
 			ctx.drawImage(transitionCanvas,0,0,gameWidth,gameHeight);
-			//ctx.restore();
 			
-			if (!bFadeIn && !bFadeOut) bMakeTransition = false;	
+			if (!bFadeIn && !bFadeOut) {bMakeTransition = false; transitionCanvas = null};
 		} else {			
 			//Desenhar o canvas específico de cada stage
 			stage.stageLoop(deltaTime);
@@ -123,12 +134,14 @@ window.onload = function(){
 	};
 	
 	//Envia os cliques para os stages
-	canvas.addEventListener('click', function(e){if(stage != undefined) stage.getClickPos(e.pageX - canvas.offsetLeft, e.pageY - canvas.offsetY);}, false);
+	canvas.addEventListener('click', function(e){if(stage != undefined) stage.getClickPos(e.pageX - canvas.offsetLeft, e.pageY - canvas.offsetTop);}, false);
 	
 	//--------------------------------------------------Helpers-------------------------------------------------
 	getGameWidth = function(){return gameWidth;};
 	getGameHeight = function(){return gameHeight;};
 	getGameImages = function(){return gameImages;};
+	
+	setGameMode = function(gMode){gameMode = gMode;}
 	
 	callStartStage = function(stageToChange){currentStage = stageToChange; startStage();};
 	
