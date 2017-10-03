@@ -7,6 +7,9 @@ var splashScreen = function(manager){
 	var clickPosX;
 	var clickPosY;
 	
+	var mousePosX;
+	var mousePosY;
+	
 	var beginTextAlpha = 1.0;
 	var signal = 1;
 	var fadeSpeed = 0.95;	
@@ -66,6 +69,11 @@ var splashScreen = function(manager){
 		getClickPos: function(PosX, PosY){
 			clickPosX = PosX;
 			clickPosY = PosY;
+		},
+		
+		getMousePos: function(PosX, PosY){
+			mousePosX = PosX;
+			mousePosY = PosY;
 		}
 	};
 }

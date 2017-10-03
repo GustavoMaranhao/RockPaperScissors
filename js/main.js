@@ -27,20 +27,27 @@ window.onload = function(){
 	
 	preloadImageAssets(['Image_BackGround',
 	 				    'GameStage/Button_Exit',
+						'GameStage/Button_Exit_Hover',
 						'GameStage/Button_Paper',
 						'GameStage/Button_Rock',
 						'GameStage/Button_Scissors',
+						'GameStage/Button_Paper_Hover',
+						'GameStage/Button_Rock_Hover',
+						'GameStage/Button_Scissors_Hover',
 						'GameStage/Pannel_Lower',
 						'GameStage/Pannel_Upper',
 						'GameStage/Result_Paper',
 						'GameStage/Result_Rock',
-						'GameStage/Result_Scissors',
+						'GameStage/Result_Scissors',						
 						'GameStage/Text_Draw',
 						'GameStage/Text_Lose',
 						'GameStage/Text_Win',
 						'MainMenu/Button_Quit',
 						'MainMenu/Button_VsComp',
 						'MainMenu/Button_VsPlayer',
+						'MainMenu/Button_Quit_Hover',
+						'MainMenu/Button_VsComp_Hover',
+						'MainMenu/Button_VsPlayer_Hover',
 						'MainMenu/Text_Choose',
 						'SplashMenu/Text_Begin',
 						'SplashMenu/Text_Title'],
@@ -136,6 +143,9 @@ window.onload = function(){
 	
 	//Envia os cliques para os stages
 	canvas.addEventListener('click', function(e){if(stage != undefined) stage.getClickPos(e.pageX - canvas.offsetLeft, e.pageY - canvas.offsetTop);}, false);
+	
+	//Envia a posição do mouse para os stages
+	canvas.addEventListener('mousemove', function(e){if(stage != undefined) stage.getMousePos(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);}, false);
 	
 	//--------------------------------------------------Helpers-------------------------------------------------
 	getGameWidth = function(){return gameWidth;};

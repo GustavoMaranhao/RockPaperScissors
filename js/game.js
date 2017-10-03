@@ -7,6 +7,9 @@ var gameScreen = function(manager, gMode){
 	var clickPosX;
 	var clickPosY;
 	
+	var mousePosX;
+	var mousePosY;
+	
 	var gameMode = gMode;
 	
 	var gameElements = [];
@@ -46,6 +49,7 @@ var gameScreen = function(manager, gMode){
 		gameElements.push({
 			elemName: "Exit",
 			src: manager.getGameImages()['GameStage/Button_Exit'],
+			hover: manager.getGameImages()['GameStage/Button_Exit_Hover'],
 			left: gameScreenCanvas.width - manager.getGameImages()['GameStage/Button_Exit'].width - edgePadding,
 			top: auxHeight,
 			width: manager.getGameImages()['GameStage/Button_Exit'].width,
@@ -56,6 +60,7 @@ var gameScreen = function(manager, gMode){
 		gameElements.push({
 			elemName: "Paper",
 			src: manager.getGameImages()['GameStage/Button_Paper'],
+			hover: manager.getGameImages()['GameStage/Button_Paper_Hover'],
 			left: (gameScreenCanvas.width - manager.getGameImages()['GameStage/Button_Paper'].width)/2,
 			top: gameScreenCanvas.height - manager.getGameImages()['GameStage/Button_Paper'].height - edgePadding,
 			width: manager.getGameImages()['GameStage/Button_Paper'].width,
@@ -68,6 +73,7 @@ var gameScreen = function(manager, gMode){
 		gameElements.push({
 			elemName: "Rock",
 			src: manager.getGameImages()['GameStage/Button_Rock'],
+			hover: manager.getGameImages()['GameStage/Button_Rock_Hover'],
 			left: (gameScreenCanvas.width - 3*manager.getGameImages()['GameStage/Button_Rock'].width)/2 - edgePadding,
 			top: auxHeight - manager.getGameImages()['GameStage/Button_Rock'].height/2 - buttonPadding,
 			width: manager.getGameImages()['GameStage/Button_Rock'].width,
@@ -79,6 +85,7 @@ var gameScreen = function(manager, gMode){
 		gameElements.push({
 			elemName: "Scissors",
 			src: manager.getGameImages()['GameStage/Button_Scissors'],
+			hover: manager.getGameImages()['GameStage/Button_Scissors_Hover'],
 			left: (gameScreenCanvas.width + manager.getGameImages()['GameStage/Button_Scissors'].width)/2 + edgePadding,
 			top: auxHeight - manager.getGameImages()['GameStage/Button_Scissors'].height/2 - buttonPadding,
 			width: manager.getGameImages()['GameStage/Button_Scissors'].width,
@@ -129,9 +136,13 @@ var gameScreen = function(manager, gMode){
 		//Desenha os elementos estáticos de decoração da tela
 		drawStaticElements();
 		
-		gameElements.forEach(function(gameElement) {		
-			//Desenha os elementos criados de interação com o player		
-			gameScreenCtx.drawImage(gameElement.src,gameElement.left,gameElement.top,gameElement.width,gameElement.height);
+		gameElements.forEach(function(gameElement) {
+			//Desenha os elementos criados de interação com o player em seu estado de hover ou descanso
+			if (mousePosY > gameElement.top && mousePosY < gameElement.top + gameElement.height 
+				&& mousePosX > gameElement.left && mousePosX < gameElement.left + gameElement.width)
+				gameScreenCtx.drawImage(gameElement.hover,gameElement.left,gameElement.top,gameElement.width,gameElement.height);
+			else
+				gameScreenCtx.drawImage(gameElement.src,gameElement.left,gameElement.top,gameElement.width,gameElement.height);
 			
 			//Se não estamos jogando
 			if(!bIsPlaying)
@@ -313,6 +324,11 @@ var gameScreen = function(manager, gMode){
 		getClickPos: function(PosX, PosY){
 			clickPosX = PosX;
 			clickPosY = PosY;
+		},
+		
+		getMousePos: function(PosX, PosY){
+			mousePosX = PosX;
+			mousePosY = PosY;
 		}
 	};
 }

@@ -4,15 +4,18 @@ var menuScreen = function(manager){
 	var menuCanvas = menuCanvas || manager.createCanvas(manager.getGameWidth(), manager.getGameHeight());
 	var menuCtx = menuCanvas.getContext('2d');
 	
+	var clickPosX;
+	var clickPosY;
+	
+	var mousePosX;
+	var mousePosY;
+	
 	var bElementsCreated = false;
 	var menuElements = [];
 	
 	//Padding entre os elementos da tela
 	var buttonPadding = 10;
-	var edgePadding = 5;
-	
-	var clickPosX;
-	var clickPosY;
+	var edgePadding = 5;	
 	
 	function createElements() {
 		//Variável auxiliar para desenhar os sprites na altura correta
@@ -22,6 +25,7 @@ var menuScreen = function(manager){
 		menuElements.push({
 			elemName: "Text_Choose",
 			src: manager.getGameImages()['MainMenu/Text_Choose'],
+			hover: manager.getGameImages()['MainMenu/Text_Choose'],
 			left: (menuCanvas.width - manager.getGameImages()['MainMenu/Text_Choose'].width)/2,
 			top: edgePadding,
 			width: manager.getGameImages()['MainMenu/Text_Choose'].width,
@@ -33,6 +37,7 @@ var menuScreen = function(manager){
 		menuElements.push({
 			elemName: "Vs_Player",
 			src: manager.getGameImages()['MainMenu/Button_VsPlayer'],
+			hover: manager.getGameImages()['MainMenu/Button_VsPlayer_Hover'],
 			left: (menuCanvas.width - manager.getGameImages()['MainMenu/Button_VsPlayer'].width)/2,
 			top: auxHeight,
 			width: manager.getGameImages()['MainMenu/Button_VsPlayer'].width,
@@ -44,6 +49,7 @@ var menuScreen = function(manager){
 		menuElements.push({
 			elemName: "Vs_Computer",
 			src: manager.getGameImages()['MainMenu/Button_VsComp'],
+			hover: manager.getGameImages()['MainMenu/Button_VsComp_Hover'],
 			left: (menuCanvas.width - manager.getGameImages()['MainMenu/Button_VsComp'].width)/2,
 			top: auxHeight,
 			width: manager.getGameImages()['MainMenu/Button_VsComp'].width,
@@ -55,6 +61,7 @@ var menuScreen = function(manager){
 		menuElements.push({
 			elemName: "Quit",
 			src: manager.getGameImages()['MainMenu/Button_Quit'],
+			hover: manager.getGameImages()['MainMenu/Button_Quit_Hover'],
 			left: (menuCanvas.width - manager.getGameImages()['MainMenu/Button_Quit'].width)/2,
 			top: menuCanvas.height - manager.getGameImages()['MainMenu/Button_Quit'].height - edgePadding,
 			width: manager.getGameImages()['MainMenu/Button_Quit'].width,
@@ -72,8 +79,12 @@ var menuScreen = function(manager){
 		menuCtx.clearRect(0,0,menuCanvas.width, menuCanvas.height);		
 				
 		menuElements.forEach(function(menuElement) {		
-			//Desenha os elementos criados anteriormente na tela		
-			menuCtx.drawImage(menuElement.src,menuElement.left,menuElement.top,menuElement.width,menuElement.height);
+			//Desenha os elementos criados anteriormente na tela em seu estado hover ou descanso	
+			if (mousePosY > menuElement.top && mousePosY < menuElement.top + menuElement.height 
+				&& mousePosX > menuElement.left && mousePosX < menuElement.left + menuElement.width)			
+				menuCtx.drawImage(menuElement.hover,menuElement.left,menuElement.top,menuElement.width,menuElement.height);
+			else
+				menuCtx.drawImage(menuElement.src,menuElement.left,menuElement.top,menuElement.width,menuElement.height);
 			
 			//Verifica se o player selecionou algum botão
 			if (clickPosY > menuElement.top && clickPosY < menuElement.top + menuElement.height 
@@ -87,6 +98,10 @@ var menuScreen = function(manager){
 					case "Quit": manager.callStartStage(0); break;
 					//Desconsidera o clique caso não seja nenhum dos elementos
 					default: clickPosX = 0; clickPosY = 0;
+					
+					//Reseta o clique ao final
+					clickPosX = 0; 
+					clickPosY = 0;
 				}
 			}
 		});		
@@ -111,6 +126,11 @@ var menuScreen = function(manager){
 		getClickPos: function(PosX, PosY){			
 			clickPosX = PosX;
 			clickPosY = PosY;
+		},
+		
+		getMousePos: function(PosX, PosY){
+			mousePosX = PosX;
+			mousePosY = PosY;
 		}
 	};
 }
