@@ -18,7 +18,11 @@ var gameScreen = function(manager, gMode){
 	var numberOfGames = 0;
 	var numberOfVictories = 0;
 	
+	var roundChoice = '';
+	var roundOpponentChoice = '';
+	
 	//TODO Verificar o caso de duplo-clique
+	//TODO variável defaul nula com additional rules
 	
 	function createElements() {
 		//Variável auxiliar para desenhar os sprites na altura correta
@@ -107,24 +111,37 @@ var gameScreen = function(manager, gMode){
 		gameElements.forEach(function(gameElement) {		
 			//Desenha os elementos criados de interação com o player		
 			gameScreenCtx.drawImage(gameElement.src,gameElement.left,gameElement.top,gameElement.width,gameElement.height);
-			
+						
 			//Verifica se o player selecionou algum botão
 			if (clickPosY > gameElement.top && clickPosY < gameElement.top + gameElement.height 
 				&& clickPosX > gameElement.left && clickPosX < gameElement.left + gameElement.width) {
-				switch (gameElement.elemName){
-					//Pedra selecionada
-					case "Rock": console.log("Rock Clicked"); break;
-					//Papel selecionado
-					case "Paper": console.log("Paper Clicked"); break;
-					//Tesouras selecionadas
-					case "Scissors": console.log("Scissors Clicked"); break;
-					//Volta à Splash Screen
-					case "Exit": manager.callStartStage(0); break;
-					//Desconsidera o clique caso não seja nenhum dos elementos
-					default: clickPosX = 0; clickPosY = 0;
-				}
+					//Apenas para o modo Vs. Player ou foi selecionado o botão de saída selecionado
+					if (gameElement.elemName == "Exit")
+						//Volta à Splash Screen
+						manager.callStartStage(1);
+					else if (gameMode == 1)
+						//Opção selecionada
+						roundChoice = gameElement.elemName;
+					
+					console.log(roundChoice);
+					//Reseta o clique ao final
+					clickPosX = 0; 
+					clickPosY = 0;
 			}
 		});			
+	}
+	
+	//Função com a lógica do jogo contra um jogador humano
+	function PlayVsPlayer(){
+		//Se o jogador já escolheu uma opção
+		if (roundChoice != ''){
+			
+		}
+	}
+	
+	//Função com a lógica do jogo contra o computador
+	function PlayVsComputer(){
+		
 	}
 	
 	//Define as funções e variáveis que serão de escopo público
@@ -135,8 +152,8 @@ var gameScreen = function(manager, gMode){
 			
 			//Verifica qual modo está sendo jogado
 			switch(gameMode){
-				case 1: console.log("Vs Player Mode Started"); break;
-				case 2: console.log("Vs Computer Mode Started"); break;
+				case 1: PlayVsPlayer(); break;
+				case 2: PlayVsComputer(); break;
 				default: alert('An error seems to have happened, please try again!'); manager.callStartStage(0); break;
 			}
 			
