@@ -37,9 +37,10 @@ var gameScreen = function(manager, gMode){
 	var resultScreenTimer = 0;
 	var resultScreenWait = 115;
 	
-	var scoreAdded = false;
+	var vsCompEndTimer = 0;
+	var vsCompEndTimerDefault = 3;
 	
-	//TODO variável defaul nula com additional rules
+	var scoreAdded = false;
 	
 	function createElements() {
 		//Variável auxiliar para desenhar os sprites na altura correta
@@ -140,12 +141,16 @@ var gameScreen = function(manager, gMode){
 			//Desenha os elementos criados de interação com o player em seu estado de hover ou descanso
 			if (mousePosY > gameElement.top && mousePosY < gameElement.top + gameElement.height 
 				&& mousePosX > gameElement.left && mousePosX < gameElement.left + gameElement.width)
-				gameScreenCtx.drawImage(gameElement.hover,gameElement.left,gameElement.top,gameElement.width,gameElement.height);
+				//Não mostrar o hover na tela de resultados e nem caso player esteja só observando
+				if((bIsPlaying && (gameMode == 1)) || ((gameMode != 1) && (gameElement.elemName != "Exit")))
+					gameScreenCtx.drawImage(gameElement.src,gameElement.left,gameElement.top,gameElement.width,gameElement.height);
+				else
+					gameScreenCtx.drawImage(gameElement.hover,gameElement.left,gameElement.top,gameElement.width,gameElement.height);
 			else
 				gameScreenCtx.drawImage(gameElement.src,gameElement.left,gameElement.top,gameElement.width,gameElement.height);
 			
 			//Se não estamos jogando
-			if(!bIsPlaying)
+			if(!bIsPlaying || (gameMode != 1))
 				//Verifica se o player selecionou algum botão
 				if (clickPosY > gameElement.top && clickPosY < gameElement.top + gameElement.height 
 					&& clickPosX > gameElement.left && clickPosX < gameElement.left + gameElement.width) {
@@ -166,20 +171,30 @@ var gameScreen = function(manager, gMode){
 	
 	//Função com a lógica do jogo contra um jogador humano
 	function PlayVsPlayer(deltaTime){
-		//Se o jogador já escolheu uma opção e o resultado não está sendo avaliado
+		play(deltaTime, (gameMode != 1));
+	}
+	
+	//Função com a lógica do jogo contra o computador
+	function PlayVsComputer(deltaTime){
+		if (roundChoice == '') roundChoice = pickRandomChoice();	
+		play(deltaTime, (gameMode != 1));
+	}
+	
+	function play(deltaTime,bAutomated){
+		//Se o player 1 já escolheu uma opção e o resultado não está sendo avaliado
 		if ((roundChoice != '') && !bIsPlaying){
 			bIsPlaying = true;
 			
 			//Escolhe uma opção para o adversário
-			roundOpponentChoice = pickOpponentChoice();						
+			roundOpponentChoice = pickRandomChoice();						
 		}
 		
-		//Se o oponente já escolheu o que jogar e estamos jogando
+		//Se o player 1 já escolheu o que jogar e estamos jogando
 		if((roundOpponentChoice != '') && bIsPlaying){
 			//Desenha as opções escolhidas na tela
-			drawChoices(roundChoice,roundOpponentChoice, deltaTime);
+			drawChoices(roundChoice,roundOpponentChoice, deltaTime, bAutomated);
 			
-			//Verifica se o player (primeiro parâmetro) venceu o adversário (segundo parâmetro)
+			//Verifica se o player 1 (primeiro parâmetro) venceu o adversário (segundo parâmetro)
 			var victory = checkChoices(roundChoice, roundOpponentChoice);
 			
 			//Desenha o resultado da partida
@@ -190,24 +205,34 @@ var gameScreen = function(manager, gMode){
 				scoreAdded = true;
 				
 				numberOfGames++;
+
+				//Escreve o número de vitórias apenas em jogos vs. Player
 				if(victory == 'Win') numberOfVictories++;
+				if(bAutomated) numberOfVictories = '';
+			}
+			
+			//Verifica se estamos jogando Vs. Comp para reiniciar o jogo
+			if(bAutomated){
+				//Autaliza o tempo de espera
+				vsCompEndTimer += deltaTime;
+				
+				//Reseta o jogo ao final do timer
+				if(vsCompEndTimer >= vsCompEndTimerDefault){
+					vsCompEndTimer = 0;
+					resetGame();
+				}
 			}
 		}
 	}
 	
-	//Função com a lógica do jogo contra o computador
-	function PlayVsComputer(){
-		
-	}
-	
-	function pickOpponentChoice(){
+	function pickRandomChoice(){
 		var choice = '';
 		//Escolher um número aleatório entre 0 e o comprimento do vetor de elementos (+1 para desconsiderar o primeiro elemento "Exit")
 		var pick = Math.floor(Math.random() * gameElements.length) + 1;
 		if((pick > 0) && (pick < gameElements.length))
 			choice = gameElements[pick].elemName;
 		else
-			choice = pickOpponentChoice();
+			choice = pickRandomChoice();
 		return choice;
 	}
 	
@@ -233,20 +258,34 @@ var gameScreen = function(manager, gMode){
 	}	
 	
 	//Função que desenha a opção 1 na parte da tela mais abaixo da opção 2
-	function drawChoices(choice1,choice2,deltaTime){
+	function drawChoices(choice1,choice2,deltaTime,bAutomated){
 		//Autaliza o tempo de animação
 		choicesAnimTime += animSpeed*deltaTime;
 		
-		gameScreenCtx.save();
-		//Animação de Fade In
-		gameScreenCtx.globalAlpha = choicesAnimTime/defaultAnimTime;
-		
-		//Desenha um fundo para indicar que os resultados estão sendo mostrados
-		gameScreenCtx.beginPath();
-		gameScreenCtx.rect(0, 0, gameScreenCanvas.width, gameScreenCanvas.height);
-		gameScreenCtx.fillStyle='rgb(0,0,0,0.5)';
-		gameScreenCtx.fill();
-		gameScreenCtx.closePath();
+		gameScreenCtx.save();		
+					
+		//Desenha um fundo para indicar que os resultados estão sendo mostrados apenas se for Vs. Player
+		if(!bAutomated){		
+			//Animação de Fade In
+			gameScreenCtx.globalAlpha = choicesAnimTime/defaultAnimTime;
+			
+			gameScreenCtx.beginPath();
+			gameScreenCtx.rect(0, 0, gameScreenCanvas.width, gameScreenCanvas.height);
+			gameScreenCtx.fillStyle='rgb(0,0,0,0.5)';
+			gameScreenCtx.fill();
+			gameScreenCtx.closePath();
+		}
+		//Ou sobre a caixa com as opções caso seja Vs. Comp
+		else{
+			gameScreenCtx.beginPath();
+			gameScreenCtx.rect(0, resultScreenBottom, gameScreenCanvas.width, gameScreenCanvas.height);
+			gameScreenCtx.fillStyle='rgb(0,0,0,0.65)';
+			gameScreenCtx.fill();
+			gameScreenCtx.closePath();
+			
+			//Animação de Fade In
+			gameScreenCtx.globalAlpha = choicesAnimTime/defaultAnimTime;
+		}		
 		
 		//Desenha a escolha do jogador
 		gameScreenCtx.drawImage(manager.getGameImages()['GameStage/Result_'+choice1],
@@ -303,7 +342,7 @@ var gameScreen = function(manager, gMode){
 			//Verifica qual modo está sendo jogado
 			switch(gameMode){
 				case 1: PlayVsPlayer(delta); break;
-				case 2: PlayVsComputer(); break;
+				case 2: PlayVsComputer(delta); break;
 				default: alert('An error seems to have happened, please try again!'); manager.callStartStage(0); break;
 			}
 			
