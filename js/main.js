@@ -120,7 +120,7 @@ window.onload = function(){
 			}			
 
 			//Aplica a transparência à tela de transição
-			transitionCtx.fillStyle='rgb(0,0,0,'+tempAlpha+')';
+			transitionCtx.fillStyle='rgba(0,0,0,'+tempAlpha+')';
 			transitionCtx.fill();
 			transitionCtx.closePath();
 			

@@ -268,18 +268,19 @@ var gameScreen = function(manager, gMode){
 		if(!bAutomated){		
 			//Animação de Fade In
 			gameScreenCtx.globalAlpha = choicesAnimTime/defaultAnimTime;
-			
+
 			gameScreenCtx.beginPath();
 			gameScreenCtx.rect(0, 0, gameScreenCanvas.width, gameScreenCanvas.height);
-			gameScreenCtx.fillStyle='rgb(0,0,0,0.5)';
+			gameScreenCtx.fillStyle='rgba(0,0,0,0.5)';
 			gameScreenCtx.fill();
+
 			gameScreenCtx.closePath();
 		}
 		//Ou sobre a caixa com as opções caso seja Vs. Comp
 		else{
 			gameScreenCtx.beginPath();
 			gameScreenCtx.rect(0, resultScreenBottom, gameScreenCanvas.width, gameScreenCanvas.height);
-			gameScreenCtx.fillStyle='rgb(0,0,0,0.65)';
+			gameScreenCtx.fillStyle='rgba(0,0,0,0.65)';
 			gameScreenCtx.fill();
 			gameScreenCtx.closePath();
 			
