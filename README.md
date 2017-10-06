@@ -1,4 +1,7 @@
  # RockPaperScissors
+  Video demonstration: https://youtu.be/GPPix5iWr5U  
+  Link to the playable version: https://rockpaperscissorsartifact.bitballoon.com  
+  
   Simple Rock, Paper, Scissors game created using only JavaScript and HTML. The art assets were created from scratch and the game's logic is all containned in 4 JavaScript files while the HTML index is only used to define the game area. The game follows the flow of screens presented bellow:  
   
 ![alt text](https://github.com/GustavoMaranhao/RockPaperScissors/blob/master/images/SplashMenu/_ConceptArt.png)                  ![alt text](https://github.com/GustavoMaranhao/RockPaperScissors/blob/master/images/MainMenu/_ConceptArt.png)                   ![alt text](https://github.com/GustavoMaranhao/RockPaperScissors/blob/master/images/GameStage/_ConceptArt.png)    
@@ -13,7 +16,4 @@
   
   If instead the match consists of the human player versus a computer player, then all the game options will be enabled, allowing the human player to select what he would like to play while the computer player waits. Hovering over a game element will then have a highlight to indicate what is chosen and also a tooltip with what the element can beat in the game. The results are then evaluated and a veridict of who won is given, increasing the game rankings as stated previously.
   
-  This project has been tested fully using FireFox Mozilla version 55.0.3 (32 bits), Google Chrome version 61.0.3163.100 (64 bits) and Internet Explorer 11 version 11.608.15063.0 in both desktop versions and mobile ones.  
-  
-  Video demonstration:   
-  Link to the playable version:https://rockpaperscissorsartifact.bitballoon.com
+  This project has been tested fully using FireFox Mozilla version 55.0.3 (32 bits), Google Chrome version 61.0.3163.100 (64 bits) and Internet Explorer 11 version 11.608.15063.0 in both desktop versions and mobile ones.
