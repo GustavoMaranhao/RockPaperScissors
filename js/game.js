@@ -51,6 +51,7 @@ var gameScreen = function(manager, gMode){
 			elemName: "Exit",
 			src: manager.getGameImages()['GameStage/Button_Exit'],
 			hover: manager.getGameImages()['GameStage/Button_Exit_Hover'],
+			tooltip: '',
 			left: gameScreenCanvas.width - manager.getGameImages()['GameStage/Button_Exit'].width - edgePadding,
 			top: auxHeight,
 			width: manager.getGameImages()['GameStage/Button_Exit'].width,
@@ -62,6 +63,7 @@ var gameScreen = function(manager, gMode){
 			elemName: "Paper",
 			src: manager.getGameImages()['GameStage/Button_Paper'],
 			hover: manager.getGameImages()['GameStage/Button_Paper_Hover'],
+			tooltip: manager.getGameImages()['GameStage/Tooltip_Paper'],
 			left: (gameScreenCanvas.width - manager.getGameImages()['GameStage/Button_Paper'].width)/2,
 			top: gameScreenCanvas.height - manager.getGameImages()['GameStage/Button_Paper'].height - edgePadding,
 			width: manager.getGameImages()['GameStage/Button_Paper'].width,
@@ -75,6 +77,7 @@ var gameScreen = function(manager, gMode){
 			elemName: "Rock",
 			src: manager.getGameImages()['GameStage/Button_Rock'],
 			hover: manager.getGameImages()['GameStage/Button_Rock_Hover'],
+			tooltip: manager.getGameImages()['GameStage/Tooltip_Rock'],
 			left: (gameScreenCanvas.width - 3*manager.getGameImages()['GameStage/Button_Rock'].width)/2 - edgePadding,
 			top: auxHeight - manager.getGameImages()['GameStage/Button_Rock'].height/2 - buttonPadding,
 			width: manager.getGameImages()['GameStage/Button_Rock'].width,
@@ -87,6 +90,7 @@ var gameScreen = function(manager, gMode){
 			elemName: "Scissors",
 			src: manager.getGameImages()['GameStage/Button_Scissors'],
 			hover: manager.getGameImages()['GameStage/Button_Scissors_Hover'],
+			tooltip: manager.getGameImages()['GameStage/Tooltip_Scissors'],
 			left: (gameScreenCanvas.width + manager.getGameImages()['GameStage/Button_Scissors'].width)/2 + edgePadding,
 			top: auxHeight - manager.getGameImages()['GameStage/Button_Scissors'].height/2 - buttonPadding,
 			width: manager.getGameImages()['GameStage/Button_Scissors'].width,
@@ -114,17 +118,46 @@ var gameScreen = function(manager, gMode){
 							   manager.getGameImages()['GameStage/Pannel_Lower'].width,
 							   manager.getGameImages()['GameStage/Pannel_Lower'].height);
 		//Variável auxiliar para o desenho do resultado posteriormente
-		resultScreenBottom = gameScreenCanvas.height - manager.getGameImages()['GameStage/Pannel_Lower'].height;
+		resultScreenBottom = gameScreenCanvas.height - manager.getGameImages()['GameStage/Pannel_Lower'].height;		
 
 		//Desenha texto do número de jogos
-		gameScreenCtx.font = "18px Buxton Sketch";
-		gameScreenCtx.fillStyle = "white";
-		gameScreenCtx.fillText("Number of games: "+numberOfGames, 5, 20);
+		gameScreenCtx.font = '18px Buxton Sketch';
+		gameScreenCtx.fillStyle = 'white';
+		//Desenha o texto com um ajuste para o caso de o browser não ter a fonte instalada não passar do tamanho estipulado para o texto
+		gameScreenCtx.fillText("Number of games: "+numberOfGames, 5, 20,(gameScreenCanvas.width - manager.getGameImages()['GameStage/Button_Exit'].width) - 20);
 		
 		//Desenha texto do número de vitórias
-		gameScreenCtx.font = "18px Buxton Sketch";
-		gameScreenCtx.fillStyle = "white";
-		gameScreenCtx.fillText("Number of victories: "+numberOfVictories, 5, 40);
+		gameScreenCtx.font = '18px Buxton Sketch';	
+		gameScreenCtx.fillStyle = 'white';
+		//Desenha o texto com um ajuste para o caso de o browser não ter a fonte instalada não passar do tamanho estipulado para o texto
+		gameScreenCtx.fillText("Number of victories: "+numberOfVictories, 5, 40,(gameScreenCanvas.width - manager.getGameImages()['GameStage/Button_Exit'].width) - 20);
+	}
+	
+	function drawElementTooltip(tooltipImage){
+		//Retorna caso não haja tooltip no elemento
+		if(tooltipImage == '')
+			return;
+		
+		var posToDrawX = mousePosX;
+		var posToDrawY = mousePosY - tooltipImage.height;
+		
+		//Verifica se a tooltip não está saindo da tela
+		if(posToDrawX + tooltipImage.width > gameScreenCanvas.width)
+			posToDrawX = gameScreenCanvas.width - tooltipImage.width;			
+
+		//Verifica a altura que a tooltip deve ser desenhada
+		if(posToDrawY + tooltipImage.height > gameScreenCanvas.height)
+			posToDrawY = gameScreenCanvas.height - tooltipImage.height;
+		
+		//Caso haja algo para desenhar, cria o elemento a uma distância fixa acima do mouse
+		gameScreenCtx.save();
+		gameScreenCtx.globalAlpha = 0.85;
+		gameScreenCtx.drawImage(tooltipImage,
+							    posToDrawX,
+							    posToDrawY,
+							    tooltipImage.width,
+							    tooltipImage.height);
+		gameScreenCtx.restore();
 	}
 	
 	draw = function(delta){
@@ -166,7 +199,17 @@ var gameScreen = function(manager, gMode){
 						clickPosX = 0; 
 						clickPosY = 0;
 				}
-		});			
+		});	
+
+		//Desenhar o tooltip sempre por cima de todos os outros elementos
+		gameElements.forEach(function(gameElement) {
+			//Verifica qual tooltip deve ser desenhado
+			if (mousePosY > gameElement.top && mousePosY < gameElement.top + gameElement.height 
+				&& mousePosX > gameElement.left && mousePosX < gameElement.left + gameElement.width)
+				//Não mostrar o hover na tela de resultados e nem caso player esteja só observando
+				if(!( (bIsPlaying && (gameMode == 1)) || ((gameMode != 1) && (gameElement.elemName != "Exit")) ))
+					drawElementTooltip(gameElement.tooltip);
+		});
 	}
 	
 	//Função com a lógica do jogo contra um jogador humano

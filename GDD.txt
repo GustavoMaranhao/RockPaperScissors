@@ -36,7 +36,7 @@ Assets Needed:
 	 - Textures for showing both options and the resulting winner in the game stage;
 
 Considerations:
- The game has been tested in FireFox Mozilla version 55.0.3 (32 bits);
+ The game has been tested in FireFox Mozilla version 55.0.3 (32 bits), Google Chrome version 61.0.3163.100 (64 bits) and Internet Explorer 11 version 11.608.15063.0;
 
 Possible future add-ons to the Minimum Viable Product:
  - Different player behaviour;
@@ -44,10 +44,4 @@ Possible future add-ons to the Minimum Viable Product:
  - Rock, paper, scissors, lizard, Spock (Remember to update the mechanics section);
  - Confirmation screen of the player's choice;
  - Instructions screen;
- - Tooltips on the selection;
  - Button animations;
-
-GDD ToDo:
- Create a description/readme in the GitHub repository;
- Review the assets needed;
- Test in a webserver;
